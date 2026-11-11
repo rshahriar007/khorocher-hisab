@@ -21,7 +21,6 @@ class KhorocherHisabApp extends StatelessWidget {
   }
 }
 
-// Transaction Model
 enum TransactionType { income, expense, receivable, payable }
 
 class TransactionModel {
@@ -56,42 +55,14 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
 
-  double totalBalance = 17340.0;
-  double todayExpense = 450.0;
-  double totalReceivable = 1200.0;
-  double totalPayable = 600.0;
+  // সব ব্যালেন্স শূন্য (Fresh Start)
+  double totalBalance = 0.0;
+  double todayExpense = 0.0;
+  double totalReceivable = 0.0;
+  double totalPayable = 0.0;
 
-  final List<TransactionModel> transactions = [
-    TransactionModel(
-      id: '1',
-      title: 'দুপুরের খাবার',
-      date: 'আজ, দুপুর ১:৩০',
-      amount: 180.0,
-      type: TransactionType.expense,
-      avatarText: 'খা',
-      avatarColor: const Color(0xFFFFD4C2),
-    ),
-    TransactionModel(
-      id: '2',
-      title: 'রাকিব হাসান',
-      date: 'লেনদেন: ০৫ মার্চ ২০২৬',
-      dueDate: 'ফেরত: ২৫ মার্চ ২০২৬',
-      amount: 1200.0,
-      type: TransactionType.receivable,
-      avatarText: 'রা',
-      avatarColor: const Color(0xFFD4E6F1),
-    ),
-    TransactionModel(
-      id: '3',
-      title: 'করিম চাচা (দোকান বাকি)',
-      date: 'লেনদেন: ০১ মার্চ ২০২৬',
-      dueDate: 'ফেরত: ১৫ মার্চ ২০২৬',
-      amount: 600.0,
-      type: TransactionType.payable,
-      avatarText: 'ক',
-      avatarColor: const Color(0xFFFFE8B8),
-    ),
-  ];
+  // সম্পূর্ণ খালি ফ্রেশ হিস্ট্রি
+  final List<TransactionModel> transactions = [];
 
   void _addTransaction(String title, double amount, TransactionType type, {String? dueDate}) {
     setState(() {
@@ -629,7 +600,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: const [
-                      Text('হ্যালো রাফাত! স্বাগতম', style: TextStyle(fontSize: 13, color: Colors.grey)),
+                      Text('হ্যালো, স্বাগতম!', style: TextStyle(fontSize: 13, color: Colors.grey)),
                       SizedBox(height: 2),
                       Text('খরচের হিসাব', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87)),
                     ],
@@ -656,7 +627,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(color: const Color(0xFFFFE8B8), borderRadius: BorderRadius.circular(20)),
-                      child: const Text('+০.৬০%', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFFB46200))),
+                      child: const Text('বর্তমান অবস্থা', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFFB46200))),
                     ),
                     const SizedBox(height: 6),
                     Text('৳ ${totalBalance.toStringAsFixed(0)}', style: const TextStyle(fontSize: 38, fontWeight: FontWeight.bold)),
@@ -716,9 +687,23 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 ],
               ),
               const SizedBox(height: 18),
-              const Center(child: Text('সাম্প্রতিক হিসাব (সোয়াইপ করে মুছুন)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey))),
+              const Center(child: Text('সাম্প্রতিক হিসাব', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey))),
               const SizedBox(height: 12),
-              ...transactions.take(3).map((item) => _buildTransactionCard(item)).toList(),
+              transactions.isEmpty
+                  ? Container(
+                      padding: const EdgeInsets.symmetric(vertical: 30),
+                      alignment: Alignment.center,
+                      child: Column(
+                        children: const [
+                          Icon(Icons.receipt_long_outlined, size: 40, color: Colors.black26),
+                          SizedBox(height: 8),
+                          Text('এখনও কোনো হিসাব যোগ করা হয়নি', style: TextStyle(fontSize: 13, color: Colors.black45)),
+                        ],
+                      ),
+                    )
+                  : Column(
+                      children: transactions.take(3).map((item) => _buildTransactionCard(item)).toList(),
+                    ),
             ],
           ),
         ),
@@ -811,10 +796,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             const Text('সম্পূর্ণ হিস্ট্রি ও রিপোর্ট', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             const SizedBox(height: 14),
             Expanded(
-              child: ListView.builder(
-                itemCount: transactions.length,
-                itemBuilder: (ctx, i) => _buildTransactionCard(transactions[i]),
-              ),
+              child: transactions.isEmpty
+                  ? const Center(child: Text('কোনো লেনদেন পাওয়া যায়নি!'))
+                  : ListView.builder(
+                      itemCount: transactions.length,
+                      itemBuilder: (ctx, i) => _buildTransactionCard(transactions[i]),
+                    ),
             ),
           ],
         ),
